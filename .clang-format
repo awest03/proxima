@@ -1,0 +1,6 @@
+BasedOnStyle: Microsoft
+DerivePointerAlignment: false
+PointerAlignment: Right
+BreakBeforeBraces: Allman
+AccessModifierOffset: -4
+AlwaysBreakTemplateDeclarations: true
