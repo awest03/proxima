@@ -12,11 +12,31 @@
 namespace proxima
 {
 
-Grid<uint16_t> GenerateIntegrationField(const Grid<uint8_t> &costField, const std::vector<uint32_t> &targets);
+/**
+ * @brief Generates the integration field due to target (the cell index)
+ * 
+ * @param costField The cost field to consider (cannot be NULL)
+ * @param target The target/goal of the pathfinding
+ * @param result Grid in which to store the result (cannot be NULL). Must have same width and height as the cost field
+ */
+void GenerateIntegrationField(const Grid<uint8_t> *costField, const uint32_t target, Grid<uint16_t> *result);
 
-Grid<float> GenerateVectorField(const Grid<uint16_t> &integrationField);
+/**
+ * @brief Combines integration fields a and b into c (c can also point to a or b)
+ * 
+ * @param a An integration field to consider (cannot be NULL)
+ * @param b Another integration field to consider (cannot be NULL)
+ * @param c The integration field in which to store the result (cannot be NULL)
+ */
+void CombineIntegrationFields(const Grid<uint16_t> *a, const Grid<uint16_t> *b, Grid<uint16_t> *c);
 
-Grid<float> GenerateVectorField(const Grid<uint8_t> &costField, const std::vector<uint32_t> &targets);
+/**
+ * @brief Generates the vector direction field due to the specified integration field
+ * 
+ * @param integrationField Integration field to consider (cannot be NULL)
+ * @param result Grid to store the result (cannot be NULL). Must have same width and height as the integration field
+ */
+void GenerateVectorField(const Grid<uint16_t> *integrationField, Grid<float> *result);
 
 } // namespace proxima
 

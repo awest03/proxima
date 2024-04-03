@@ -9,17 +9,15 @@
 #include <cmath>
 #include <list>
 
-namespace proxima
-{
+using namespace proxima;
 
-Grid<uint16_t> GenerateIntegrationField(const Grid<uint8_t> &costField, const std::vector<uint32_t> &targets)
+void proxima::GenerateIntegrationField(const Grid<uint8_t> *cost, const uint32_t target, Grid<uint16_t> *result)
 {
-    Grid<uint16_t> integration(costField.width(), costField.height());
-    integration.fill(65535);
+    result->fill(65535);
 
     std::list<uint32_t> openList;
-    integration[targets[0]] = 0;
-    openList.push_back(targets[0]);
+    (*result)[target] = 0;
+    openList.push_back(target);
 
     while (!openList.empty())
     {
@@ -27,61 +25,56 @@ Grid<uint16_t> GenerateIntegrationField(const Grid<uint8_t> &costField, const st
         uint32_t id = openList.front();
         openList.pop_front();
 
-        auto [x, y] = costField.getCoordinate(id);
+        auto [x, y] = cost->getCoordinate(id);
 
         // Get neighbours
-        std::vector<uint32_t> neighbours = costField.getDirectNeighbours(x, y);
+        std::vector<uint32_t> neighbours = cost->getDirectNeighbours(x, y);
 
         for (uint32_t i = 0; i < neighbours.size(); i++)
         {
-            if (costField[neighbours[i]] == 255)
+            if ((*cost)[neighbours[i]] == 255)
                 continue;
 
-            uint32_t endCost = integration[id] + costField[neighbours[i]];
-            if (endCost < integration[neighbours[i]])
+            uint32_t endCost = (*result)[id] + (*cost)[neighbours[i]];
+            if (endCost < (*result)[neighbours[i]])
             {
                 openList.push_back(neighbours[i]);
-                integration[neighbours[i]] = (uint16_t)endCost;
+                (*result)[neighbours[i]] = (uint16_t)endCost;
             }
         }
     }
-
-    return integration;
 }
 
-Grid<float> GenerateVectorField(const Grid<uint16_t> &integrationField)
-{
-    Grid<float> direction(integrationField.width(), integrationField.height());
-    direction.fill(0.0f);
-
-    for (uint32_t i = 0; i < integrationField.area(); i++)
+void proxima::CombineIntegrationFields(const Grid<uint16_t> *a, const Grid<uint16_t> *b, Grid<uint16_t> *c)
+{   
+    for (uint32_t i = 0; i < c->area(); i++)
     {
-        auto [x, y] = integrationField.getCoordinate(i);
-        std::vector<uint32_t> neighbours = integrationField.getAllNeighbours(x, y);
+        (*c)[i] = std::min((*a)[i], (*b)[i]);
+    }
+}
 
-        uint16_t best = integrationField[i];
+void proxima::GenerateVectorField(const Grid<uint16_t> *intField, Grid<float> *result)
+{
+    result->fill(0.0f);
+
+    for (uint32_t i = 0; i < intField->area(); i++)
+    {
+        auto [x, y] = intField->getCoordinate(i);
+        std::vector<uint32_t> neighbours = intField->getAllNeighbours(x, y);
+
+        uint16_t best = (*intField)[i];
         uint32_t bestId = i;
         for (auto &n : neighbours)
         {
-            if (integrationField[n] < best)
+            if ((*intField)[n] < best)
             {
-                best = integrationField[n];
+                best = (*intField)[n];
                 bestId = n;
             }
         }
-        auto [bx, by] = integrationField.getCoordinate(bestId);
+        auto [bx, by] = intField->getCoordinate(bestId);
         float vx = float(bx) - float(x);
         float vy = float(by) - float(y);
-        direction[i] = std::atan2(vy, vx);
+        (*result)[i] = std::atan2(vy, vx);
     }
-
-    return direction;
 }
-
-Grid<float> GenerateVectorField(const Grid<uint8_t> &costField, const std::vector<uint32_t> &targets)
-{
-    Grid<uint16_t> integration = GenerateIntegrationField(costField, targets);
-    return GenerateVectorField(integration);
-}
-
-} // namespace proxima

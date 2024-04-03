@@ -19,17 +19,22 @@ int main()
     grid(6, 6) = 255;
     grid(5, 6) = 255;
 
-    std::vector<uint32_t> targets = {
-        grid.getIndex(9, 9)
-    };
+    proxima::Grid<uint16_t> int1 (10, 10);
+    proxima::GenerateIntegrationField(&grid, grid.getIndex(6, 9), &int1);
 
-    proxima::Grid<float> directionField = proxima::GenerateVectorField(grid, targets);
+    proxima::Grid<uint16_t> int2 (10, 10);
+    proxima::GenerateIntegrationField(&grid, grid.getIndex(4, 5), &int2);
+
+    proxima::CombineIntegrationFields(&int1, &int2, &int1);
+
+    proxima::Grid<float> directionField (10, 10);
+    proxima::GenerateVectorField(&int1, &directionField);
 
     for (uint32_t i = 0; i < grid.height(); i++)
     {
         for (uint32_t j = 0; j < grid.width(); j++)
         {
-            std::cout << directionField(j, i)/* / float(M_PI)*/;
+            std::cout << directionField(j, i);
             if (j != grid.width() - 1) std::cout << ",";
         }
         std::cout << "\n";
