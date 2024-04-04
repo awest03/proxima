@@ -35,6 +35,7 @@ public:
     const T &operator[](const uint32_t index) const;
 
     std::vector<uint32_t> getDirectNeighbours(const uint32_t x, const uint32_t y) const;
+    std::vector<uint32_t> getDiagonalNeighbours(const uint32_t x, const uint32_t y) const;
     std::vector<uint32_t> getAllNeighbours(const uint32_t x, const uint32_t y) const;
 
     bool contains(const uint32_t x, const uint32_t y) const;
@@ -131,10 +132,10 @@ std::vector<uint32_t> Grid<T>::getDirectNeighbours(const uint32_t x, const uint3
 }
 
 template <typename T>
-std::vector<uint32_t> Grid<T>::getAllNeighbours(const uint32_t x, const uint32_t y) const
+std::vector<uint32_t> Grid<T>::getDiagonalNeighbours(const uint32_t x, const uint32_t y) const
 {
-    std::vector<uint32_t> neighbours = getDirectNeighbours(x, y);
-    neighbours.reserve(8); // four more neighbours will join us
+    std::vector<uint32_t> neighbours;
+    neighbours.reserve(4);
     
     if (x > 0)
     {
@@ -151,6 +152,15 @@ std::vector<uint32_t> Grid<T>::getAllNeighbours(const uint32_t x, const uint32_t
             neighbours.push_back(getIndex(x + 1, y + 1));
     }
 
+    return neighbours;
+}
+
+template <typename T>
+std::vector<uint32_t> Grid<T>::getAllNeighbours(const uint32_t x, const uint32_t y) const
+{
+    std::vector<uint32_t> neighbours = getDirectNeighbours(x, y);
+    std::vector<uint32_t> diagonals = getDiagonalNeighbours(x, y);
+    neighbours.insert(neighbours.end(), diagonals.begin(), diagonals.end());
     return neighbours;
 }
 

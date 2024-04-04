@@ -13,7 +13,7 @@ fileName = sys.argv[1]
 data = np.genfromtxt(fileName, delimiter=",")
 
 for iy, ix in np.ndindex(data.shape):
-    plt.quiver(ix, iy, 0.5*np.cos(data[iy,ix]), -0.5*np.sin(data[iy,ix]))
+    plt.quiver(ix, iy, 0.5*np.cos(data[iy,ix]), -0.5*np.sin(data[iy,ix]), scale=30)
 
 plt.xticks(range(0, data.shape[1]))
 plt.yticks(range(0, data.shape[0]))

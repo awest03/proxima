@@ -53,6 +53,65 @@ void proxima::CombineIntegrationFields(const Grid<uint16_t> *a, const Grid<uint1
     }
 }
 
+uint32_t proxima::GetBestNeighbour(const Grid<uint16_t> *intField, const uint32_t x, const uint32_t y)
+{
+    uint16_t best = (*intField)(x, y);
+    uint32_t bestId = intField->getIndex(x, y);
+
+    bool top = false, bottom = false, left = false, right = false;
+
+    // First check direct neighbours
+    std::vector<uint32_t> direct = intField->getDirectNeighbours(x, y);
+    for (uint32_t &n : direct)
+    {
+        if ((*intField)[n] < best)
+        {
+            best = (*intField)[n];
+            bestId = n;
+        }
+        else if ((*intField)[n] == 65535)
+        {
+            auto [nx, ny] = intField->getCoordinate(n);
+            if (nx < x) left = true;
+            else if (nx > x) right = true;
+            else if (ny > y) top = true;
+            else if (ny < y) bottom = true;
+        }
+    }
+
+    // Now check diagonal neighbours
+    std::vector<uint32_t> diagonal = intField->getDiagonalNeighbours(x, y);
+    for (uint32_t &n : diagonal)
+    {
+        if ((*intField)[n] < best)
+        {
+            // More complicated: Can we actually reach this cell?
+            auto [nx, ny] = intField->getCoordinate(n);
+            // Left...
+            if (nx < x && !left)
+                goto check;
+            else if (nx > x && !right) // Right...
+                goto check;
+            
+            // Cell is unreachable
+            continue;
+            
+            // Check if the cell is top or bottom
+            check:
+            // Top
+            if (ny > y && top)
+                continue;
+            else if (ny < y && bottom) // Bottom
+                continue;
+
+            best = (*intField)[n];
+            bestId = n;
+        }
+    }
+
+    return bestId;
+}
+
 void proxima::GenerateVectorField(const Grid<uint16_t> *intField, Grid<float> *result)
 {
     result->fill(0.0f);

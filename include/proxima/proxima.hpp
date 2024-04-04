@@ -31,6 +31,16 @@ void GenerateIntegrationField(const Grid<uint8_t> *costField, const uint32_t tar
 void CombineIntegrationFields(const Grid<uint16_t> *a, const Grid<uint16_t> *b, Grid<uint16_t> *c);
 
 /**
+ * @brief Get the best neighbouring cell that is possible to reach
+ * 
+ * @param intField integration field to consider (cannot be NULL)
+ * @param x x coordinate of cell
+ * @param y y coordinate of cell
+ * @return uint32_t id of best neigbouring cell
+ */
+uint32_t GetBestNeighbour(const Grid<uint16_t> *intField, const uint32_t x, const uint32_t y);
+
+/**
  * @brief Generates the vector direction field due to the specified integration field
  * 
  * @param integrationField Integration field to consider (cannot be NULL)
