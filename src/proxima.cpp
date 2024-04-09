@@ -43,6 +43,98 @@ bool MovementDirection::hasMagnitude() const
     return (dir & (uint8_t)Direction::X) || (dir & (uint8_t)Direction::Y);
 }
 
+std::tuple<bool, uint16_t> getDirectPathLow(const Grid<uint8_t> *costField, uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1)
+{
+    uint16_t totalCost = 0;
+
+    int dx = int(x1) - int(x0);
+    int dy = int(y1) - int(y0);
+
+    int yi = 1;
+    if (dy < 0)
+    {
+        yi = -1;
+        dy = -dy;
+    }
+    int D = (2 * dy) - dx;
+    int y = y0;
+
+    for (int x = x0; x < x1; x++)
+    {
+        uint8_t cost = (*costField)(x, y);
+        if (cost == 255) return { false, totalCost };
+        totalCost += cost;
+        if (D > 0)
+        {
+            y += yi;
+            D += (2 * (dy - dx));
+        }
+        else
+        {
+            D += 2*dy;
+        }
+    }
+
+    return { true, totalCost };
+}
+
+std::tuple<bool, uint16_t> getDirectPathHigh(const Grid<uint8_t> *costField, uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1)
+{
+    uint16_t totalCost = 0;
+
+    int dx = int(x1) - int(x0);
+    int dy = int(y1) - int(y0);
+
+    int xi = 1;
+    if (dx < 0)
+    {
+        xi = -1;
+        dx = -dx;
+    }
+    int D = (2 * dx) - dy;
+    int x = x0;
+
+    for (int y = y0; y < y1; y++)
+    {
+        uint8_t cost = (*costField)(x, y);
+        if (cost == 255) return { false, totalCost };
+        totalCost += cost;
+        if (D > 0)
+        {
+            x += xi;
+            D += (2 * (dx - dy));
+        }
+        else
+        {
+            D += 2*dx;
+        }
+    }
+
+    return { true, totalCost };
+}
+
+// Based on Bresenham's line alogorithm
+std::tuple<bool, uint16_t> proxima::GetDirectPath(const Grid<uint8_t> *costField, const uint32_t a, const uint32_t b)
+{
+    auto [x0, y0] = costField->getCoordinate(a);
+    auto [x1, y1] = costField->getCoordinate(b);
+
+    if (std::abs(int(y1) - int(y0)) < std::abs(int(x1) - int(x0)))
+    {
+        if (x0 > x1)
+            return getDirectPathLow(costField, x1, y1, x0, y0);
+        else
+            return getDirectPathLow(costField, x0, y0, x1, y1);
+    }
+    else
+    {
+        if (y0 > y1)
+            return getDirectPathHigh(costField, x1, y1, x0, y0);
+        else
+            return getDirectPathHigh(costField, x0, y0, x1, y1);
+    }
+}
+
 // Based on algorithm described by https://web.archive.org/web/20190725152730/http://aigamedev.com/open/tutorial/clearance-based-pathfinding/
 uint32_t proxima::GetCellClearance(const Grid<uint8_t> *costField, const uint32_t x, const uint32_t y, const uint32_t maxClearance)
 {

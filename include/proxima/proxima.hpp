@@ -39,6 +39,16 @@ struct MovementDirection
 };
 
 /**
+ * @brief Determines whether there is a direct line of sight from a to b and calculates its cost
+ * 
+ * @param costField The cost field to consider (cannot be NULL)
+ * @param a the id of the first cell
+ * @param b the id of the second cell
+ * @return std::tuple<bool, uint16_t> whether there is a direct path and if so it's cost
+ */
+std::tuple<bool, uint16_t> GetDirectPath(const Grid<uint8_t> *costField, const uint32_t a, const uint32_t b);
+
+/**
  * @brief Gets the clearance of a cell, i.e. how large of an object can pass through tiles down and right
  * 
  * @param costField The cost field to consider (cannot be NULL)
