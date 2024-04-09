@@ -13,6 +13,32 @@ namespace proxima
 {
 
 /**
+ * @brief Since there are only 8 possible directions we don't need a float
+ * 
+ */
+enum class Direction : uint8_t
+{
+    X = 1 << 0,
+    InvertX = 1 << 1,
+    Y = 1 << 2,
+    InvertY = 1 << 3,
+};
+
+/**
+ * @brief Wrapper class to make directions easier to work with
+ * 
+ */
+struct MovementDirection
+{
+    void fromVector(float x, float y);
+
+    float getAngle() const;
+    bool hasMagnitude() const;
+
+    uint8_t dir;
+};
+
+/**
  * @brief Generates the integration field due to target (the cell index)
  * 
  * @param costField The cost field to consider (cannot be NULL)
@@ -41,12 +67,14 @@ void CombineIntegrationFields(const Grid<uint16_t> *a, const Grid<uint16_t> *b, 
 uint32_t GetBestNeighbour(const Grid<uint16_t> *intField, const uint32_t x, const uint32_t y);
 
 /**
- * @brief Generates the vector direction field due to the specified integration field
+ * @brief Gets the best direction to travel in from this cell
  * 
- * @param integrationField Integration field to consider (cannot be NULL)
- * @param result Grid to store the result (cannot be NULL). Must have same width and height as the integration field
+ * @param intfield integration field to consider (cannot be NULL)
+ * @param x x coordinate of cell
+ * @param y y coordinate of cell
+ * @return MovementDirection with best direction of travel
  */
-void GenerateVectorField(const Grid<uint16_t> *integrationField, Grid<float> *result);
+MovementDirection GetBestDirection(const Grid<uint16_t> *intField, const uint32_t x, const uint32_t y);
 
 } // namespace proxima
 

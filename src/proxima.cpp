@@ -11,6 +11,38 @@
 
 using namespace proxima;
 
+void MovementDirection::fromVector(float x, float y)
+{
+    dir = 0;
+    if (std::abs(x) > 0.0f)
+    {
+        dir |= (uint8_t)Direction::X;
+        if (x < 0.0f)
+            dir |= (uint8_t)Direction::InvertX;
+    }
+    if (std::abs(y) > 0.0f)
+    {
+        dir |= (uint8_t)Direction::Y;
+        if (y < 0.0f)
+            dir |= (uint8_t)Direction::InvertY;
+    }
+}
+
+float MovementDirection::getAngle() const
+{
+    float x = dir & (uint8_t)Direction::X ? 1.0f : 0.0f;
+    if (dir & (uint8_t)Direction::InvertX) x = -x;
+    float y = dir & (uint8_t)Direction::Y ? 1.0f : 0.0f;
+    if (dir & (uint8_t)Direction::InvertY) y = -y;
+
+    return std::atan2(y, x);
+}
+
+bool MovementDirection::hasMagnitude() const
+{
+    return (dir & (uint8_t)Direction::X) || (dir & (uint8_t)Direction::Y);
+}
+
 void proxima::GenerateIntegrationField(const Grid<uint8_t> *cost, const uint32_t target, Grid<uint16_t> *result)
 {
     result->fill(65535);
@@ -112,28 +144,13 @@ uint32_t proxima::GetBestNeighbour(const Grid<uint16_t> *intField, const uint32_
     return bestId;
 }
 
-void proxima::GenerateVectorField(const Grid<uint16_t> *intField, Grid<float> *result)
+MovementDirection proxima::GetBestDirection(const Grid<uint16_t> *intField, const uint32_t x, const uint32_t y)
 {
-    result->fill(0.0f);
-
-    for (uint32_t i = 0; i < intField->area(); i++)
-    {
-        auto [x, y] = intField->getCoordinate(i);
-        std::vector<uint32_t> neighbours = intField->getAllNeighbours(x, y);
-
-        uint16_t best = (*intField)[i];
-        uint32_t bestId = i;
-        for (auto &n : neighbours)
-        {
-            if ((*intField)[n] < best)
-            {
-                best = (*intField)[n];
-                bestId = n;
-            }
-        }
-        auto [bx, by] = intField->getCoordinate(bestId);
-        float vx = float(bx) - float(x);
-        float vy = float(by) - float(y);
-        (*result)[i] = std::atan2(vy, vx);
-    }
+    uint32_t bestId = GetBestNeighbour(intField, x, y);
+    auto [bx, by] = intField->getCoordinate(bestId);
+    float vx = float(bx) - float(x);
+    float vy = float(by) - float(y);
+    MovementDirection md;
+    md.fromVector(vx, vy);
+    return md;
 }
