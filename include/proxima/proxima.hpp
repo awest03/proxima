@@ -39,6 +39,17 @@ struct MovementDirection
 };
 
 /**
+ * @brief Gets the clearance of a cell, i.e. how large of an object can pass through tiles down and right
+ * 
+ * @param costField The cost field to consider (cannot be NULL)
+ * @param x x coordinate of the cell to consider
+ * @param y y coordinate of the cell to consider
+ * @param maxClearance maximum clearance to consider (0 for unlimited, not recommended for performance)
+ * @return the clearance of the cell
+ */
+uint32_t GetCellClearance(const Grid<uint8_t> *costField, const uint32_t x, const uint32_t y, const uint32_t maxClearance);
+
+/**
  * @brief Generates the integration field due to target (the cell index)
  * 
  * @param costField The cost field to consider (cannot be NULL)

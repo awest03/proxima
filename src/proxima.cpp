@@ -43,6 +43,29 @@ bool MovementDirection::hasMagnitude() const
     return (dir & (uint8_t)Direction::X) || (dir & (uint8_t)Direction::Y);
 }
 
+// Based on algorithm described by https://web.archive.org/web/20190725152730/http://aigamedev.com/open/tutorial/clearance-based-pathfinding/
+uint32_t proxima::GetCellClearance(const Grid<uint8_t> *costField, const uint32_t x, const uint32_t y, const uint32_t maxClearance)
+{
+    for (uint32_t i = 0; ; i++)
+    {
+        uint32_t diagx = x + i;
+        uint32_t diagy = y + i;
+
+        if (diagx >= costField->width() || diagy >= costField->height()) return i - 1;
+
+        if ((*costField)(diagx, diagy) == 255) return i;
+        for (uint32_t j = 1; j < i; j++)
+        {
+            // Check vertically
+            if ((*costField)(diagx, diagy - j) == 255) return i;
+            // Check horizontally
+            if ((*costField)(diagx - j, diagy) == 255) return i;
+        }
+
+        if (maxClearance != 0 && i == maxClearance) return i;
+    }
+}
+
 void proxima::GenerateIntegrationField(const Grid<uint8_t> *cost, const uint32_t target, Grid<uint16_t> *result)
 {
     result->fill(65535);
