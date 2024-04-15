@@ -59,7 +59,7 @@ std::tuple<bool, uint16_t> getDirectPathLow(const Grid<uint8_t> *costField, uint
     int D = (2 * dy) - dx;
     int y = y0;
 
-    for (int x = x0; x < x1; x++)
+    for (int x = x0; x < int(x1); x++)
     {
         uint8_t cost = (*costField)(x, y);
         if (cost == 255) return { false, totalCost };
@@ -94,7 +94,7 @@ std::tuple<bool, uint16_t> getDirectPathHigh(const Grid<uint8_t> *costField, uin
     int D = (2 * dx) - dy;
     int x = x0;
 
-    for (int y = y0; y < y1; y++)
+    for (int y = y0; y < int(y1); y++)
     {
         uint8_t cost = (*costField)(x, y);
         if (cost == 255) return { false, totalCost };
@@ -114,7 +114,7 @@ std::tuple<bool, uint16_t> getDirectPathHigh(const Grid<uint8_t> *costField, uin
 }
 
 // Based on Bresenham's line alogorithm
-std::tuple<bool, uint16_t> proxima::GetDirectPath(const Grid<uint8_t> *costField, const uint32_t a, const uint32_t b)
+std::tuple<bool, uint16_t> proxima::GetDirectPath(const Grid<uint8_t> *costField, const uint16_t a, const uint16_t b)
 {
     auto [x0, y0] = costField->getCoordinate(a);
     auto [x1, y1] = costField->getCoordinate(b);
@@ -136,17 +136,17 @@ std::tuple<bool, uint16_t> proxima::GetDirectPath(const Grid<uint8_t> *costField
 }
 
 // Based on algorithm described by https://web.archive.org/web/20190725152730/http://aigamedev.com/open/tutorial/clearance-based-pathfinding/
-uint32_t proxima::GetCellClearance(const Grid<uint8_t> *costField, const uint32_t x, const uint32_t y, const uint32_t maxClearance)
+uint8_t proxima::GetCellClearance(const Grid<uint8_t> *costField, const uint8_t x, const uint8_t y, const uint8_t maxClearance)
 {
-    for (uint32_t i = 0; ; i++)
+    for (uint8_t i = 0; ; i++)
     {
-        uint32_t diagx = x + i;
-        uint32_t diagy = y + i;
+        uint8_t diagx = x + i;
+        uint8_t diagy = y + i;
 
-        if (diagx >= costField->width() || diagy >= costField->height()) return i - 1;
+        if (diagx >= costField->width || diagy >= costField->height) return i - 1;
 
         if ((*costField)(diagx, diagy) == 255) return i;
-        for (uint32_t j = 1; j < i; j++)
+        for (uint8_t j = 1; j < i; j++)
         {
             // Check vertically
             if ((*costField)(diagx, diagy - j) == 255) return i;
@@ -158,7 +158,7 @@ uint32_t proxima::GetCellClearance(const Grid<uint8_t> *costField, const uint32_
     }
 }
 
-void proxima::GenerateIntegrationField(const Grid<uint8_t> *cost, const uint32_t target, Grid<uint16_t> *result)
+void proxima::GenerateIntegrationField(const Grid<uint8_t> *cost, const uint16_t target, Grid<uint16_t> *result)
 {
     result->fill(65535);
 
@@ -175,7 +175,7 @@ void proxima::GenerateIntegrationField(const Grid<uint8_t> *cost, const uint32_t
         auto [x, y] = cost->getCoordinate(id);
 
         // Get neighbours
-        std::vector<uint32_t> neighbours = cost->getDirectNeighbours(x, y);
+        std::vector<uint16_t> neighbours = cost->getDirectNeighbours(x, y);
 
         for (uint32_t i = 0; i < neighbours.size(); i++)
         {
@@ -200,7 +200,7 @@ void proxima::CombineIntegrationFields(const Grid<uint16_t> *a, const Grid<uint1
     }
 }
 
-uint32_t proxima::GetBestNeighbour(const Grid<uint16_t> *intField, const uint32_t x, const uint32_t y)
+uint16_t proxima::GetBestNeighbour(const Grid<uint16_t> *intField, const uint8_t x, const uint8_t y)
 {
     uint16_t best = (*intField)(x, y);
     uint32_t bestId = intField->getIndex(x, y);
@@ -208,8 +208,8 @@ uint32_t proxima::GetBestNeighbour(const Grid<uint16_t> *intField, const uint32_
     bool top = false, bottom = false, left = false, right = false;
 
     // First check direct neighbours
-    std::vector<uint32_t> direct = intField->getDirectNeighbours(x, y);
-    for (uint32_t &n : direct)
+    std::vector<uint16_t> direct = intField->getDirectNeighbours(x, y);
+    for (uint16_t &n : direct)
     {
         if ((*intField)[n] < best)
         {
@@ -227,8 +227,8 @@ uint32_t proxima::GetBestNeighbour(const Grid<uint16_t> *intField, const uint32_
     }
 
     // Now check diagonal neighbours
-    std::vector<uint32_t> diagonal = intField->getDiagonalNeighbours(x, y);
-    for (uint32_t &n : diagonal)
+    std::vector<uint16_t> diagonal = intField->getDiagonalNeighbours(x, y);
+    for (uint16_t &n : diagonal)
     {
         if ((*intField)[n] < best)
         {
@@ -259,7 +259,7 @@ uint32_t proxima::GetBestNeighbour(const Grid<uint16_t> *intField, const uint32_
     return bestId;
 }
 
-MovementDirection proxima::GetBestDirection(const Grid<uint16_t> *intField, const uint32_t x, const uint32_t y)
+MovementDirection proxima::GetBestDirection(const Grid<uint16_t> *intField, const uint8_t x, const uint8_t y)
 {
     uint32_t bestId = GetBestNeighbour(intField, x, y);
     auto [bx, by] = intField->getCoordinate(bestId);

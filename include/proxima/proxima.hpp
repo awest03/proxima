@@ -46,7 +46,7 @@ struct MovementDirection
  * @param b the id of the second cell
  * @return std::tuple<bool, uint16_t> whether there is a direct path and if so it's cost
  */
-std::tuple<bool, uint16_t> GetDirectPath(const Grid<uint8_t> *costField, const uint32_t a, const uint32_t b);
+std::tuple<bool, uint16_t> GetDirectPath(const Grid<uint8_t> *costField, const uint16_t a, const uint16_t b);
 
 /**
  * @brief Gets the clearance of a cell, i.e. how large of an object can pass through tiles down and right
@@ -57,7 +57,7 @@ std::tuple<bool, uint16_t> GetDirectPath(const Grid<uint8_t> *costField, const u
  * @param maxClearance maximum clearance to consider (0 for unlimited, not recommended for performance)
  * @return the clearance of the cell
  */
-uint32_t GetCellClearance(const Grid<uint8_t> *costField, const uint32_t x, const uint32_t y, const uint32_t maxClearance);
+uint8_t GetCellClearance(const Grid<uint8_t> *costField, const uint8_t x, const uint8_t y, const uint8_t maxClearance);
 
 /**
  * @brief Generates the integration field due to target (the cell index)
@@ -66,7 +66,7 @@ uint32_t GetCellClearance(const Grid<uint8_t> *costField, const uint32_t x, cons
  * @param target The target/goal of the pathfinding
  * @param result Grid in which to store the result (cannot be NULL). Must have same width and height as the cost field
  */
-void GenerateIntegrationField(const Grid<uint8_t> *costField, const uint32_t target, Grid<uint16_t> *result);
+void GenerateIntegrationField(const Grid<uint8_t> *costField, const uint16_t target, Grid<uint16_t> *result);
 
 /**
  * @brief Combines integration fields a and b into c (c can also point to a or b)
@@ -85,7 +85,7 @@ void CombineIntegrationFields(const Grid<uint16_t> *a, const Grid<uint16_t> *b, 
  * @param y y coordinate of cell
  * @return uint32_t id of best neigbouring cell
  */
-uint32_t GetBestNeighbour(const Grid<uint16_t> *intField, const uint32_t x, const uint32_t y);
+uint16_t GetBestNeighbour(const Grid<uint16_t> *intField, const uint8_t x, const uint8_t y);
 
 /**
  * @brief Gets the best direction to travel in from this cell
@@ -95,7 +95,7 @@ uint32_t GetBestNeighbour(const Grid<uint16_t> *intField, const uint32_t x, cons
  * @param y y coordinate of cell
  * @return MovementDirection with best direction of travel
  */
-MovementDirection GetBestDirection(const Grid<uint16_t> *intField, const uint32_t x, const uint32_t y);
+MovementDirection GetBestDirection(const Grid<uint16_t> *intField, const uint8_t x, const uint8_t y);
 
 } // namespace proxima
 
