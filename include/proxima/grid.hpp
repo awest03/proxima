@@ -17,72 +17,75 @@ namespace proxima
 /**
  * @brief Simple interface for a generic grid. Default implementation assume row-major list for storage
  * 
- * @tparam T 
+ * @tparam T Data type stored in grid
+ * @tparam C Type used for x and y coordinates (e.g. uint8_t)
+ * @tparam I Type used for cell indices, must be able to handle values up to x*y (e.g. uint16_t)
+ * @tparam S Signed version of C (e.g. int8_t)
  */
-template <typename T>
+template <typename T, typename C, typename I, typename S>
 class Grid
 {
 public:
-    Grid(const uint8_t width, const uint8_t height);
+    Grid(const C width, const C height);
 
-    const uint8_t width, height;
-    virtual uint16_t area() const;
+    const C width, height;
+    virtual I area() const;
 
     virtual void fill(const T value);
 
-    virtual std::tuple<uint8_t, uint8_t> getCoordinate(const uint16_t index) const;
-    virtual T &operator()(const uint8_t x, const uint8_t y) = 0;
-    virtual const T &operator()(const uint8_t x, const uint8_t y) const = 0;
+    virtual std::tuple<C, C> getCoordinate(const I index) const;
+    virtual T &operator()(const C x, const C y) = 0;
+    virtual const T &operator()(const C x, const C y) const = 0;
 
-    virtual uint16_t getIndex(const uint8_t x, const uint8_t y) const;
-    virtual T &operator[](const uint16_t index) = 0;
-    virtual const T &operator[](const uint16_t index) const = 0;
+    virtual I getIndex(const C x, const C y) const;
+    virtual T &operator[](const I index) = 0;
+    virtual const T &operator[](const I index) const = 0;
 
-    virtual std::vector<uint16_t> getDirectNeighbours(const uint8_t x, const uint8_t y) const;
-    virtual std::vector<uint16_t> getDiagonalNeighbours(const uint8_t x, const uint8_t y) const;
-    virtual std::vector<uint16_t> getAllNeighbours(const uint8_t x, const uint8_t y) const;
+    virtual std::vector<I> getDirectNeighbours(const C x, const C y) const;
+    virtual std::vector<I> getDiagonalNeighbours(const C x, const C y) const;
+    virtual std::vector<I> getAllNeighbours(const C x, const C y) const;
 
-    virtual bool contains(const uint8_t x, const uint8_t y) const;
-    virtual bool contains(const uint16_t index) const;
+    virtual bool contains(const C x, const C y) const;
+    virtual bool contains(const I index) const;
 };
 
-template <typename T>
-inline Grid<T>::Grid(const uint8_t width, const uint8_t height)
+template <typename T, typename C, typename I, typename S>
+inline Grid<T, C, I, S>::Grid(const C width, const C height)
     : width(width), height(height)
 {
 }
 
-template <typename T>
-inline uint16_t Grid<T>::area() const
+template <typename T, typename C, typename I, typename S>
+inline I Grid<T, C, I, S>::area() const
 {
     return width * height;
 }
 
-template <typename T>
-inline void Grid<T>::fill(const T value)
+template <typename T, typename C, typename I, typename S>
+inline void Grid<T, C, I, S>::fill(const T value)
 {
-    for (uint16_t i = 0; i < area(); i++)
+    for (I i = 0; i < area(); i++)
     {
         (*this)[i] = value;
     }
 }
 
-template <typename T>
-inline std::tuple<uint8_t, uint8_t> Grid<T>::getCoordinate(const uint16_t index) const
+template <typename T, typename C, typename I, typename S>
+inline std::tuple<C, C> Grid<T, C, I, S>::getCoordinate(const I index) const
 {
     return { index % width, index / width };
 }
 
-template <typename T>
-uint16_t Grid<T>::getIndex(const uint8_t x, const uint8_t y) const
+template <typename T, typename C, typename I, typename S>
+I Grid<T, C, I, S>::getIndex(const C x, const C y) const
 {
     return y * width + x;
 }
 
-template <typename T>
-std::vector<uint16_t> Grid<T>::getDirectNeighbours(const uint8_t x, const uint8_t y) const
+template <typename T, typename C, typename I, typename S>
+std::vector<I> Grid<T, C, I, S>::getDirectNeighbours(const C x, const C y) const
 {
-    std::vector<uint16_t> neighbours;
+    std::vector<I> neighbours;
     neighbours.reserve(4);
     if (x > 0)
         neighbours.push_back(getIndex(x - 1, y));
@@ -95,10 +98,10 @@ std::vector<uint16_t> Grid<T>::getDirectNeighbours(const uint8_t x, const uint8_
     return neighbours;
 }
 
-template <typename T>
-std::vector<uint16_t> Grid<T>::getDiagonalNeighbours(const uint8_t x, const uint8_t y) const
+template <typename T, typename C, typename I, typename S>
+std::vector<I> Grid<T, C, I, S>::getDiagonalNeighbours(const C x, const C y) const
 {
-    std::vector<uint16_t> neighbours;
+    std::vector<I> neighbours;
     neighbours.reserve(4);
     
     if (x > 0)
@@ -119,23 +122,23 @@ std::vector<uint16_t> Grid<T>::getDiagonalNeighbours(const uint8_t x, const uint
     return neighbours;
 }
 
-template <typename T>
-std::vector<uint16_t> Grid<T>::getAllNeighbours(const uint8_t x, const uint8_t y) const
+template <typename T, typename C, typename I, typename S>
+std::vector<I> Grid<T, C, I, S>::getAllNeighbours(const C x, const C y) const
 {
-    std::vector<uint16_t> neighbours = getDirectNeighbours(x, y);
-    std::vector<uint16_t> diagonals = getDiagonalNeighbours(x, y);
+    std::vector<I> neighbours = getDirectNeighbours(x, y);
+    std::vector<I> diagonals = getDiagonalNeighbours(x, y);
     neighbours.insert(neighbours.end(), diagonals.begin(), diagonals.end());
     return neighbours;
 }
 
-template <typename T>
-bool Grid<T>::contains(const uint8_t x, const uint8_t y) const
+template <typename T, typename C, typename I, typename S>
+bool Grid<T, C, I, S>::contains(const C x, const C y) const
 {
     return x < width && y < height;
 }
 
-template <typename T>
-bool Grid<T>::contains(const uint16_t index) const
+template <typename T, typename C, typename I, typename S>
+bool Grid<T, C, I, S>::contains(const I index) const
 {
     return index < area();
 }

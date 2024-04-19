@@ -20,7 +20,7 @@ namespace proxima
  * @tparam T 
  */
 template <typename T>
-class SimpleGrid : public Grid<T>
+class SimpleGrid : public Grid<T, uint8_t, uint16_t, int8_t>
 {
 public:
     SimpleGrid(const uint8_t width, const uint8_t height);
@@ -37,7 +37,7 @@ private:
 
 template <typename T>
 inline SimpleGrid<T>::SimpleGrid(const uint8_t width, const uint8_t height)
-    : Grid<T>(width, height), m_data(width * height)
+    : Grid<T, uint8_t, uint16_t, int8_t>(width, height), m_data(width * height)
 {
 }
 
@@ -45,13 +45,13 @@ inline SimpleGrid<T>::SimpleGrid(const uint8_t width, const uint8_t height)
 template <typename T>
 inline T &SimpleGrid<T>::operator()(const uint8_t x, const uint8_t y)
 {
-    return m_data[Grid<T>::getIndex(x, y)];
+    return m_data[Grid<T, uint8_t, uint16_t, int8_t>::getIndex(x, y)];
 }
 
 template <typename T>
 inline const T &SimpleGrid<T>::operator()(const uint8_t x, const uint8_t y) const
 {
-    return m_data[Grid<T>::getIndex(x, y)];
+    return m_data[Grid<T, uint8_t, uint16_t, int8_t>::getIndex(x, y)];
 }
 
 template <typename T>
