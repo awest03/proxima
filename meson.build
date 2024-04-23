@@ -1,8 +1,11 @@
 project('proxima', 'cpp', version: '0.1.0')
 
 proxima_src = []
+subdir('src')
 
-proxima_deps = []
+proxima_deps = [
+    dependency('polypartition')
+]
 
 proxima_include = [
     include_directories('include')

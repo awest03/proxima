@@ -1,0 +1,6 @@
+[wrap-git]
+url = https://github.com/awest03/polypartition
+revision = master
+
+[provide]
+polypartition = polypartition_dep
