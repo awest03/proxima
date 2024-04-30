@@ -5,7 +5,7 @@
 */
 
 #include <proxima/mesh.hpp>
-
+#include <polypartition/polypartition.h>
 
 using namespace proxima;
 
@@ -124,4 +124,52 @@ uint16_t Mesh::indexCount() const
 uint16_t Mesh::triangleCount() const
 {
     return m_indices.size() / 3;
+}
+
+Mesh proxima::GenerateMeshFromPolygon(Polygon &poly)
+{
+    // Convert from proxima polygon to format used by polypartition
+    std::list<TPPLPoly> polys, result;
+    for (uint32_t i = 0; i < poly.polyCount(); i++)
+    {
+        PolygonPart pp = poly[i];
+        TPPLPoly p;
+        p.Init(pp.end);
+        for (uint32_t j = 0; j < pp.end; j++)
+        {
+            p[j].x = pp.vertices[j].x;
+            p[j].y = pp.vertices[j].y;
+        }
+        if (i > 0) p.SetHole(true);
+        else p.SetHole(false);
+        p.SetOrientation(TPPL_ORIENTATION_CCW);
+        polys.push_back(p);
+    }
+    // Fill polygon with triangles
+    TPPLPartition tpp;
+    if (tpp.Triangulate_EC(&polys, &result) == 0)
+    {
+        return Mesh();
+    }
+    // Generate mesh from result
+    Mesh mesh;
+    for (auto &p : result)
+    {
+        uint16_t a, b, c;
+        for (long i = 0; i < p.GetNumPoints(); i++)
+        {
+            proxima::Vertex v = { (float)p[i].x, (float)p[i].y };
+            auto idopt = mesh.findVertex(v);
+            uint16_t id;
+            if (idopt.has_value())
+                id = idopt.value();
+            else
+                id = mesh.addVertex(v);
+            a = b;
+            b = c;
+            c = id;
+        }
+        mesh.addTriangle(a, b, c);
+    }
+    return mesh;
 }

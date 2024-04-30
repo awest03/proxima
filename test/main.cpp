@@ -48,46 +48,22 @@ int main()
         std::cout << "\n";
     }*/
 
-    TPPLPoly poly;
-    std::list<TPPLPoly> result;
-    TPPLPartition pp;
-    poly.Init(4);
-    poly[0].x = 0.0f;
-    poly[0].y = 0.0f;
-    poly[1].x = 1.0f;
-    poly[1].y = 0.0f;
-    poly[2].x = 1.0f;
-    poly[2].y = -1.0f;
-    poly[3].x = 0.0f;
-    poly[3].y = -1.0f;
-    
-    std::cout << "Valid: " << poly.Valid() << "\n";
-    poly.SetOrientation(TPPL_ORIENTATION_CCW);
-
-    int res = pp.Triangulate_EC(&poly, &result);
-
-    std::cout << "Got result: " << res << "\n";
-
-    proxima::Mesh mesh;
-    for (auto &p : result)
-    {
-        std::cout << "Start Triangle\n";
-        uint16_t a, b, c;
-        for (long i = 0; i < p.GetNumPoints(); i++)
-        {
-            proxima::Vertex v = { (float)p[i].x, (float)p[i].y };
-            auto idopt = mesh.findVertex(v);
-            uint16_t id;
-            if (idopt.has_value())
-                id = idopt.value();
-            else
-                id = mesh.addVertex(v);
-            a = b;
-            b = c;
-            c = id;
-        }
-        mesh.addTriangle(a, b, c);
-    }
+    std::vector<proxima::Vertex> border (4);
+    border[0].x = 0.0f;
+    border[0].y = 0.0f;
+    border[1].x = 1.0f;
+    border[1].y = 0.0f;
+    border[2].x = 1.0f;
+    border[2].y = -1.0f;
+    border[3].x = 0.0f;
+    border[3].y = -1.0f;
+    proxima::Polygon poly (border);
+    poly.startIsland(3);
+    poly.pushIslandVertex({ 0.25, -0.25 });
+    poly.pushIslandVertex({ 0.75, -0.75 });
+    poly.pushIslandVertex({ 0.25, -0.75 });
+    poly.finishIsland();
+    proxima::Mesh mesh = proxima::GenerateMeshFromPolygon(poly);
 
     for (uint16_t i = 0; i < mesh.vertexCount(); i++)
     {

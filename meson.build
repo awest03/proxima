@@ -15,6 +15,7 @@ proxima = library(
     'proxima',
     proxima_src,
     include_directories: proxima_include,
+    dependencies: proxima_deps,
     install: true
 )
 

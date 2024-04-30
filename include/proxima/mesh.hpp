@@ -68,6 +68,8 @@ private:
     std::vector<uint16_t> m_indices;
 };
 
+Mesh GenerateMeshFromPolygon(Polygon &poly);
+
 }
 
 #endif
