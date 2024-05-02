@@ -25,6 +25,17 @@ struct PolygonPart
 {
     Vertex *vertices;
     uint16_t end;
+
+    enum class Orientation : int
+    {
+        CW = -1,
+        None = 0,
+        CCW = 1
+    };
+
+    Orientation getOrientation() const;
+    void setOrientation(Orientation orientation);
+    void invert();
 };
 
 class Polygon

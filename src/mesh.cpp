@@ -15,6 +15,43 @@ bool Vertex::operator==(const Vertex &other) const
 }
 
 
+PolygonPart::Orientation PolygonPart::getOrientation() const
+{
+    float area = 0.0f;
+    for (uint16_t i = 0; i < end; i++)
+    {
+        uint16_t j = i + 1;
+        if (j == end) j = 0; // Wrap around to start
+        area += vertices[i].x * vertices[j].y - vertices[i].y - vertices[j].x;
+    }
+    if (area > 0.0f) return Orientation::CCW;
+    else if (area < 0.0f) return Orientation::CW;
+    return Orientation::None; // No area
+}
+
+void PolygonPart::setOrientation(PolygonPart::Orientation orientation)
+{
+    Orientation o = getOrientation();
+    if (o != Orientation::None && o != orientation) invert();
+}
+
+void swapVertices(Vertex *a, Vertex *b)
+{
+    Vertex c = *b;
+    *b = *a;
+    *a = c;
+}
+
+void PolygonPart::invert()
+{
+    Vertex *start = vertices, *finish = &vertices[end];
+    while (finish > vertices)
+    {
+        swapVertices(start++, finish--);
+    }
+}
+
+
 Polygon::Polygon(const std::vector<Vertex> &borderVertices)
     : m_vertices(borderVertices)
 {
