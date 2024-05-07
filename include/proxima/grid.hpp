@@ -144,7 +144,7 @@ std::vector<uint32_t> Grid<T>::getDiagonalNeighbours(const uint32_t x, const uin
         if (y < m_height - 1)
             neighbours.push_back(getIndex(x - 1, y + 1));
     }
-    if (x < m_width)
+    if (x < m_width - 1)
     {
         if (y > 0)
             neighbours.push_back(getIndex(x + 1, y - 1));
