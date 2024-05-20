@@ -43,12 +43,12 @@ bool MovementDirection::hasMagnitude() const
     return (dir & (uint8_t)Direction::X) || (dir & (uint8_t)Direction::Y);
 }
 
-std::tuple<bool, uint16_t> getDirectPathLow(const Grid<uint8_t> *costField, uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1)
+std::tuple<bool, uint16_t> getDirectPathLow(const Grid<uint8_t> *costField, int x0, int y0, int x1, int y1)
 {
     uint16_t totalCost = 0;
 
-    int dx = int(x1) - int(x0);
-    int dy = int(y1) - int(y0);
+    int dx = x1 - x0;
+    int dy = y1 - y0;
 
     int yi = 1;
     if (dy < 0)
@@ -59,7 +59,7 @@ std::tuple<bool, uint16_t> getDirectPathLow(const Grid<uint8_t> *costField, uint
     int D = (2 * dy) - dx;
     int y = y0;
 
-    for (int x = x0; x < x1; x++)
+    for (int x = x0; x <= x1; x++)
     {
         uint8_t cost = (*costField)(x, y);
         if (cost == 255) return { false, totalCost };
@@ -78,12 +78,12 @@ std::tuple<bool, uint16_t> getDirectPathLow(const Grid<uint8_t> *costField, uint
     return { true, totalCost };
 }
 
-std::tuple<bool, uint16_t> getDirectPathHigh(const Grid<uint8_t> *costField, uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1)
+std::tuple<bool, uint16_t> getDirectPathHigh(const Grid<uint8_t> *costField, int x0, int y0, int x1, int y1)
 {
     uint16_t totalCost = 0;
 
-    int dx = int(x1) - int(x0);
-    int dy = int(y1) - int(y0);
+    int dx = x1 - x0;
+    int dy = y1 - y0;
 
     int xi = 1;
     if (dx < 0)
@@ -94,7 +94,7 @@ std::tuple<bool, uint16_t> getDirectPathHigh(const Grid<uint8_t> *costField, uin
     int D = (2 * dx) - dy;
     int x = x0;
 
-    for (int y = y0; y < y1; y++)
+    for (int y = y0; y <= y1; y++)
     {
         uint8_t cost = (*costField)(x, y);
         if (cost == 255) return { false, totalCost };
